@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VSS Accessibility Tools</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <!-- Colour overlay — managed by app.js -->
+  <div id="overlay"></div>
+
+  <header class="topbar">
+    <div class="topbar__title">VSS Accessibility Tools</div>
+    <button class="topbar__toggle button" id="toggleControls" aria-expanded="true" aria-controls="controls">
+      Hide controls
+    </button>
+  </header>
+
+  <main class="layout">
+    <!-- ── Controls panel ────────────────────────────────── -->
+    <aside class="controls" id="controls">
+
+      <section class="card">
+        <h2 class="card__title">Preset</h2>
+
+        <label class="field">
+          <span class="field__label">Category</span>
+          <select id="presetCategory" class="field__control">
+            <option value="whiteBalance">White Balance</option>
+            <option value="visionCondition">Vision Condition</option>
+            <option value="noir">Filter (NoIR-style)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Preset</span>
+          <select id="presetName" class="field__control"></select>
+        </label>
+
+        <div class="hint">Pick a category to load matching colour presets.</div>
+      </section>
+
+      <section class="card">
+        <h2 class="card__title">Intensity</h2>
+        <label class="field">
+          <span class="field__label">Overlay strength</span>
+          <input id="overlayAlpha" class="field__control" type="range" min="0" max="100" value="35" />
+        </label>
+        <div class="row">
+          <div class="pill" id="overlayAlphaValue">35%</div>
+          <button class="button" id="reset">Reset</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card__title">Text</h2>
+        <label class="field">
+          <span class="field__label">Font size</span>
+          <input id="fontSize" class="field__control" type="range" min="14" max="28" value="18" />
+        </label>
+        <div class="pill" id="fontSizeValue">18px</div>
+
+        <label class="field">
+          <span class="field__label">Line height</span>
+          <input id="lineHeight" class="field__control" type="range" min="1.2" max="2.0" step="0.05" value="1.6" />
+        </label>
+        <div class="pill" id="lineHeightValue">1.6</div>
+      </section>
+
+    </aside>
+
+    <!-- ── Viewer / demo content ──────────────────────────── -->
+    <section class="viewerWrap" id="viewerWrap">
+      <article class="viewer" id="viewer">
+        <h1>Sample content</h1>
+        <p>
+          Visual Snow Syndrome (VSS) is a neurological condition characterised by a
+          persistent "static" overlay across the visual field, along with symptoms
+          such as after-images, light sensitivity, and tinnitus.
+        </p>
+        <p>
+          Adjust the preset, intensity, and text settings in the panel on the left to
+          find a combination that reduces eye strain for you. The colour overlay
+          simulates the tinted lenses (such as NoIR or FL-41) used by many people
+          with light-sensitive conditions.
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
+          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+          quis nostrud exercitation ullamco laboris.
+        </p>
+        <ul>
+          <li>Try <strong>White Balance → Warm</strong> to reduce blue-light glare.</li>
+          <li>Try <strong>NoIR → FL-41 Rose</strong> for migraine and light sensitivity.</li>
+          <li>Try <strong>Vision Condition → High Contrast</strong> for a dark overlay.</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    // Toggle controls panel visibility
+    const toggleBtn = document.getElementById("toggleControls");
+    const controls  = document.getElementById("controls");
+    toggleBtn.addEventListener("click", () => {
+      const hidden = controls.classList.toggle("controls--hidden");
+      toggleBtn.textContent     = hidden ? "Show controls" : "Hide controls";
+      toggleBtn.setAttribute("aria-expanded", String(!hidden));
+    });
+  </script>
+</body>
+</html>
