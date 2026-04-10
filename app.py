@@ -94,6 +94,8 @@ def export():
     safe_base = "".join(c if c.isalnum() or c in "-_" else "_" for c in base) or "document"
     buf = io.BytesIO(content.encode("utf-8"))
 
+    # buf is an in-memory io.BytesIO object, not a filesystem path.
+    # Flask's send_file reads directly from the buffer; no file-system access occurs.
     return send_file(
         buf,
         as_attachment=True,
