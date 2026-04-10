@@ -183,7 +183,7 @@
     style.textContent = [
       '@font-face {',
       "  font-family: 'OpenDyslexic';",
-      "  src: url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@master/compiled/OpenDyslexic-Regular.otf')",
+      "  src: url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@v2.0.1/compiled/OpenDyslexic-Regular.otf')",
       "       format('opentype');",
       '  font-weight: normal;',
       '  font-style: normal;',

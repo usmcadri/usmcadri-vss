@@ -75,8 +75,9 @@ def upload():
             content = _text_from_docx(data)
         else:  # pdf
             content = _text_from_pdf(data)
-    except Exception as exc:
-        return jsonify({"error": f"Could not read file: {exc}"}), 422
+    except Exception:
+        app.logger.exception("Failed to parse uploaded file: %s", filename)
+        return jsonify({"error": "Could not read the file. It may be corrupted or in an unsupported format."}), 422
 
     return jsonify({"content": content, "filename": filename})
 
@@ -88,15 +89,19 @@ def export():
     filename = body.get("filename") or "document"
 
     base = os.path.splitext(secure_filename(filename))[0] or "document"
+    # Restrict the base name to safe alphanumerics, hyphens, and underscores
+    # to prevent any path-traversal or header-injection via download_name.
+    safe_base = "".join(c if c.isalnum() or c in "-_" else "_" for c in base) or "document"
     buf = io.BytesIO(content.encode("utf-8"))
 
     return send_file(
         buf,
         as_attachment=True,
-        download_name=f"{base}_edited.txt",
+        download_name=f"{safe_base}_edited.txt",
         mimetype="text/plain",
     )
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(debug=debug)
