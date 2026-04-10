@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VSS Document Viewer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+
+  <header class="topbar">
+    <button class="topbar__toggle" id="sidebarToggle" aria-label="Toggle controls panel">&#9776;</button>
+    <div class="topbar__title">VSS Document Viewer</div>
+    <div class="topbar__actions">
+      <label class="button button--upload" for="fileInput" tabindex="0">Upload Document</label>
+      <input type="file" id="fileInput" accept=".txt,.docx,.pdf" style="display:none" aria-label="Upload document file" />
+      <button class="button" id="exportBtn" disabled>Export .txt</button>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ── Controls sidebar ─────────────────────────────────────── -->
+    <aside class="controls" id="controls" aria-label="Display controls">
+
+      <!-- Preset -->
+      <section class="card">
+        <h2 class="card__title">Color Preset</h2>
+
+        <label class="field">
+          <span class="field__label">Category</span>
+          <select id="presetCategory" class="field__control">
+            <option value="whiteBalance">White Balance</option>
+            <option value="visionCondition">Vision Condition</option>
+            <option value="noir">Filter (NoIR-style)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Preset</span>
+          <select id="presetName" class="field__control"></select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Overlay strength</span>
+          <input id="overlayAlpha" class="field__control" type="range" min="0" max="100" value="35"
+                 aria-valuemin="0" aria-valuemax="100" />
+        </label>
+        <div class="row">
+          <div class="pill" id="overlayAlphaValue" aria-live="polite">35%</div>
+          <button class="button" id="reset">Reset</button>
+        </div>
+        <div class="hint">Tints the document to reduce glare and visual noise.</div>
+      </section>
+
+      <!-- White Point -->
+      <section class="card">
+        <h2 class="card__title">White Point</h2>
+        <label class="field">
+          <span class="field__label">Reduce glare</span>
+          <input id="whitePoint" class="field__control" type="range" min="30" max="100" value="90"
+                 aria-valuemin="30" aria-valuemax="100" />
+        </label>
+        <div class="pill" id="whitePointValue" aria-live="polite">90%</div>
+        <div class="hint">Dims the overall document brightness.</div>
+      </section>
+
+      <!-- Colors -->
+      <section class="card">
+        <h2 class="card__title">Colors</h2>
+        <label class="field">
+          <span class="field__label">Background</span>
+          <input id="bgColor" class="field__control field__control--color" type="color" value="#f5f2e8" />
+        </label>
+        <label class="field">
+          <span class="field__label">Text</span>
+          <input id="textColor" class="field__control field__control--color" type="color" value="#1a1a1a" />
+        </label>
+      </section>
+
+      <!-- Typography -->
+      <section class="card">
+        <h2 class="card__title">Typography</h2>
+
+        <label class="field">
+          <span class="field__label">Font</span>
+          <select id="fontFamily" class="field__control">
+            <option value="system">System Default</option>
+            <option value="opendyslexic">OpenDyslexic</option>
+            <option value="courier">Courier New</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Font size</span>
+          <input id="fontSize" class="field__control" type="range" min="14" max="28" value="18"
+                 aria-valuemin="14" aria-valuemax="28" />
+        </label>
+        <div class="pill" id="fontSizeValue" aria-live="polite">18px</div>
+
+        <label class="field">
+          <span class="field__label">Line spacing</span>
+          <input id="lineHeight" class="field__control" type="range" min="1.2" max="3.0" step="0.1" value="1.6"
+                 aria-valuemin="1.2" aria-valuemax="3.0" />
+        </label>
+        <div class="pill" id="lineHeightValue" aria-live="polite">1.6</div>
+      </section>
+
+      <!-- Margins -->
+      <section class="card">
+        <h2 class="card__title">Margins</h2>
+        <label class="field">
+          <span class="field__label">Left &amp; Right</span>
+          <input id="margins" class="field__control" type="range" min="0" max="20" value="5"
+                 aria-valuemin="0" aria-valuemax="20" />
+        </label>
+        <div class="pill" id="marginsValue" aria-live="polite">5%</div>
+      </section>
+
+    </aside>
+
+    <!-- ── Document viewer ──────────────────────────────────────── -->
+    <div class="viewerWrap" id="viewerWrap">
+      <!-- Colour/tint overlay (pointer-events:none so editing still works) -->
+      <div class="viewer__overlay" id="viewerOverlay" aria-hidden="true"></div>
+
+      <!-- Empty-state placeholder -->
+      <div class="viewer__placeholder" id="viewerPlaceholder">
+        <div class="placeholder__icon" aria-hidden="true">&#128196;</div>
+        <p class="placeholder__text">Upload a <strong>.txt</strong>, <strong>.docx</strong>, or <strong>.pdf</strong> document to get started.</p>
+        <label class="button button--primary button--upload" for="fileInput" tabindex="0">Choose File</label>
+        <p class="hint">You can also drag and drop a file onto this area.</p>
+      </div>
+
+      <!-- Editable document content -->
+      <div class="viewer__content" id="viewerContent"
+           contenteditable="true" spellcheck="false"
+           aria-label="Document content – editable" hidden></div>
+    </div>
+
+  </main>
+
+  <!-- Notification toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+
+</body>
+</html>
