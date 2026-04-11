@@ -1,0 +1,384 @@
+/* ===================================================================
+   VSS Accessibility Tools — Shared Styles
+   Used by: Flask web app (templates/index.html)
+            Chrome extension popup (extension/popup.html)
+   =================================================================== */
+
+/* 1. Reset & base ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* UI chrome */
+  --ui-bg:        #1e1e2e;
+  --panel-bg:     #252535;
+  --card-bg:      #2e2e42;
+  --border:       #3e3e58;
+  --text-primary: #e0e0f0;
+  --text-muted:   #8888aa;
+  --accent:       #7c6ff7;
+  --accent-hover: #9d94f9;
+
+  /* Document display (updated by JS) */
+  --doc-font-family:    'Atkinson Hyperlegible', sans-serif;
+  --doc-font-size:      18px;
+  --doc-line-height:    1.6;
+  --doc-letter-spacing: 0em;
+  --doc-word-spacing:   0em;
+  --doc-padding:        40px;
+  --doc-max-width:      800px;
+  --doc-bg:             #fdf8f2;
+  --doc-color:          #1a1a1a;
+  --doc-filter:         none;
+
+  /* Layout */
+  --topbar-h:    52px;
+  --controls-w:  320px;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  background: var(--ui-bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* 2. Top bar ─────────────────────────────────────────────────────── */
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--topbar-h);
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  gap: 1rem;
+  z-index: 100;
+}
+
+.topbar__title {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+/* Shown only on mobile via media query */
+.topbar__toggle { display: none; }
+
+/* 3. Two-column layout ───────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr var(--controls-w);
+  min-height: calc(100vh - var(--topbar-h));
+  margin-top: var(--topbar-h);
+}
+
+/* 4. Document viewer ─────────────────────────────────────────────── */
+.viewerWrap {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #16161f;
+}
+
+.viewer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* Hide the real <input type="file">; the <label> serves as the button */
+#fileInput { display: none; }
+
+.upload-btn { cursor: pointer; white-space: nowrap; }
+
+.filename {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.export-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.export-select {
+  width: auto;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.doc-wrapper {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem;
+}
+
+/* Tint overlay — sits on top of doc-content but doesn't block interaction */
+.doc-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  z-index: 1;
+}
+
+.doc-content {
+  position: relative;
+  width: 100%;
+  max-width: var(--doc-max-width);
+  min-height: 400px;
+  padding: var(--doc-padding);
+  background: var(--doc-bg);
+  color: var(--doc-color);
+  font-family: var(--doc-font-family);
+  font-size: var(--doc-font-size);
+  line-height: var(--doc-line-height);
+  letter-spacing: var(--doc-letter-spacing);
+  word-spacing: var(--doc-word-spacing);
+  filter: var(--doc-filter);
+  border-radius: 4px;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: background 0.2s, color 0.2s, filter 0.2s;
+}
+
+.doc-content:focus {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.placeholder {
+  color: #999;
+  font-style: italic;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 5. Settings panel ──────────────────────────────────────────────── */
+.controls {
+  background: var(--panel-bg);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* 6. Card ────────────────────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+/* 7. Form controls ───────────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field__label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field__control {
+  width: 100%;
+  background: var(--ui-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  appearance: auto;
+}
+
+.field__control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(124, 111, 247, 0.25);
+}
+
+.field__control[type="range"] {
+  padding: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.field__check {
+  accent-color: var(--accent);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* 8. Buttons ─────────────────────────────────────────────────────── */
+.button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.button:hover:not(:disabled) { background: var(--accent-hover); }
+.button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.button--ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.button--ghost:hover { background: var(--border); color: var(--text-primary); }
+
+/* 9. Misc UI ─────────────────────────────────────────────────────── */
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-block;
+  background: var(--ui-bg);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* 10. Color picker row & swatches ────────────────────────────────── */
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.color-swatch {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  flex-shrink: 0;
+}
+
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.palette__swatch {
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  flex-shrink: 0;
+}
+
+.palette__swatch:hover,
+.palette__swatch:focus {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2px var(--accent);
+  outline: none;
+}
+
+/* 11. Mobile / responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root { --controls-w: 100%; }
+
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .controls {
+    grid-row: 1;
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 50vh;
+    display: none; /* toggled by JS */
+  }
+
+  .controls.is-open { display: flex; }
+
+  .viewerWrap { grid-row: 2; }
+
+  .topbar__toggle {
+    display: block;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 5px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+}

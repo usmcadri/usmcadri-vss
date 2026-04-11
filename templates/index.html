@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VSS Accessibility Tools</title>
+
+  <!-- Atkinson Hyperlegible — highly readable, accessibility-focused font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet" />
+
+  <!-- OpenDyslexic via cdnfonts -->
+  <link href="https://fonts.cdnfonts.com/css/opendyslexic" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+
+  <!-- ── Top bar ─────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar__title">VSS Accessibility Tools</div>
+    <button class="topbar__toggle" id="settingsToggle" aria-label="Toggle settings panel">
+      ⚙ Settings
+    </button>
+  </header>
+
+  <!-- ── Two-column layout ────────────────────────────────────────── -->
+  <main class="layout">
+
+    <!-- ── Document viewer panel ──────────────────────────────────── -->
+    <section class="viewerWrap" aria-label="Document viewer">
+
+      <div class="viewer-toolbar">
+        <!-- Hidden file input; label acts as the button -->
+        <label class="button upload-btn" for="fileInput">📂 Upload</label>
+        <input type="file" id="fileInput" accept=".txt,.pdf,.docx"
+               aria-label="Upload a .txt, .pdf, or .docx document" />
+
+        <span class="filename" id="filename">No document loaded</span>
+
+        <div class="export-row">
+          <select id="exportFormat" class="field__control export-select"
+                  aria-label="Choose export format">
+            <option value="txt">Export as .txt</option>
+            <option value="docx">Export as .docx</option>
+          </select>
+          <button class="button" id="exportBtn" disabled>💾 Export</button>
+        </div>
+      </div>
+
+      <div class="doc-wrapper">
+        <!-- Amber / tint overlay — pointer-events: none so it doesn't block editing -->
+        <div id="docOverlay" class="doc-overlay" aria-hidden="true"></div>
+
+        <div id="docContent"
+             class="doc-content"
+             contenteditable="true"
+             role="textbox"
+             aria-multiline="true"
+             aria-label="Document content — editable"
+             spellcheck="false">
+          <span class="placeholder">Upload a .txt, .pdf, or .docx file to begin editing…</span>
+        </div>
+      </div>
+
+    </section><!-- .viewerWrap -->
+
+    <!-- ── Settings panel ─────────────────────────────────────────── -->
+    <aside class="controls" id="controls" aria-label="Accessibility settings">
+
+      <!-- Presets -------------------------------------------------- -->
+      <section class="card">
+        <h2 class="card__title">Presets</h2>
+
+        <label class="field">
+          <span class="field__label">Category</span>
+          <select id="presetCategory" class="field__control">
+            <option value="accessibility">Accessibility</option>
+            <option value="visual">Visual Comfort</option>
+            <option value="contrast">Contrast</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Preset</span>
+          <select id="presetName" class="field__control"></select>
+        </label>
+
+        <div class="row">
+          <button class="button" id="applyPreset">Apply</button>
+          <button class="button button--ghost" id="reset">Reset</button>
+        </div>
+      </section>
+
+      <!-- Typography ----------------------------------------------- -->
+      <section class="card">
+        <h2 class="card__title">Typography</h2>
+
+        <label class="field">
+          <span class="field__label">Font</span>
+          <select id="fontFamily" class="field__control">
+            <option value="'Atkinson Hyperlegible', sans-serif">Atkinson Hyperlegible</option>
+            <option value="OpenDyslexic, sans-serif">OpenDyslexic</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="Arial, sans-serif">Arial</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">
+            Font size <span class="pill" id="fontSizeValue">18px</span>
+          </span>
+          <input id="fontSize" class="field__control" type="range"
+                 min="12" max="36" step="1" value="18" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">
+            Line height <span class="pill" id="lineHeightValue">1.6</span>
+          </span>
+          <input id="lineHeight" class="field__control" type="range"
+                 min="1.2" max="3.0" step="0.05" value="1.6" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">
+            Letter spacing <span class="pill" id="letterSpacingValue">0em</span>
+          </span>
+          <input id="letterSpacing" class="field__control" type="range"
+                 min="0" max="0.3" step="0.01" value="0" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">
+            Word spacing <span class="pill" id="wordSpacingValue">0em</span>
+          </span>
+          <input id="wordSpacing" class="field__control" type="range"
+                 min="0" max="0.5" step="0.01" value="0" />
+        </label>
+      </section>
+
+      <!-- Layout --------------------------------------------------- -->
+      <section class="card">
+        <h2 class="card__title">Layout</h2>
+
+        <label class="field">
+          <span class="field__label">
+            Page margin <span class="pill" id="marginValue">40px</span>
+          </span>
+          <input id="margin" class="field__control" type="range"
+                 min="10" max="120" step="2" value="40" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">
+            Max width <span class="pill" id="maxWidthValue">800px</span>
+          </span>
+          <input id="maxWidth" class="field__control" type="range"
+                 min="300" max="1400" step="10" value="800" />
+        </label>
+      </section>
+
+      <!-- Color & Background --------------------------------------- -->
+      <section class="card">
+        <h2 class="card__title">Color &amp; Background</h2>
+
+        <label class="field">
+          <span class="field__label">Background</span>
+          <div class="color-row">
+            <input id="bgColor" type="color" class="color-swatch"
+                   value="#fdf8f2" aria-label="Pick background color" />
+            <div class="palette" id="bgPalette"
+                 role="group" aria-label="Background color palette"></div>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Text color</span>
+          <div class="color-row">
+            <input id="textColor" type="color" class="color-swatch"
+                   value="#1a1a1a" aria-label="Pick text color" />
+            <div class="palette" id="textPalette"
+                 role="group" aria-label="Text color palette"></div>
+          </div>
+        </label>
+      </section>
+
+      <!-- Visual Filters ------------------------------------------- -->
+      <section class="card">
+        <h2 class="card__title">Visual Filters</h2>
+
+        <label class="field">
+          <span class="field__label">
+            Brightness <span class="pill" id="brightnessValue">100%</span>
+          </span>
+          <input id="brightness" class="field__control" type="range"
+                 min="40" max="110" step="1" value="100" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">
+            Reduce white point <span class="pill" id="whitePointValue">0%</span>
+          </span>
+          <input id="whitePoint" class="field__control" type="range"
+                 min="0" max="60" step="1" value="0" />
+        </label>
+
+        <label class="field field--inline">
+          <input id="grayscale" type="checkbox" class="field__check" />
+          <span class="field__label">Grayscale mode</span>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Tint color</span>
+          <select id="overlayColor" class="field__control">
+            <option value="255,180,0">Amber (NoIR)</option>
+            <option value="255,100,100">Rose</option>
+            <option value="100,180,255">Cool Blue</option>
+            <option value="150,210,150">Soft Green</option>
+            <option value="200,150,255">Lavender</option>
+            <option value="255,255,255">None</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">
+            Overlay strength <span class="pill" id="overlayAlphaValue">0%</span>
+          </span>
+          <input id="overlayAlpha" class="field__control" type="range"
+                 min="0" max="100" step="1" value="0" />
+        </label>
+
+        <div class="hint">
+          The overlay tints the document to reduce visual strain (VSS / NoIR-style).
+        </div>
+      </section>
+
+    </aside><!-- .controls -->
+
+  </main><!-- .layout -->
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
