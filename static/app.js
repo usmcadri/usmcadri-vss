@@ -241,19 +241,28 @@
     function setChk(id, bool) { if (el[id])              el[id].checked = bool; }
 
     setVal('fontFamily',    state.fontFamily);
-    setVal('fontSize',      state.fontSize);    setTxt('fontSizeValue',      state.fontSize + 'px');
-    setVal('lineHeight',    state.lineHeight);   setTxt('lineHeightValue',    state.lineHeight);
-    setVal('letterSpacing', state.letterSpacing);setTxt('letterSpacingValue', state.letterSpacing + 'em');
-    setVal('wordSpacing',   state.wordSpacing);  setTxt('wordSpacingValue',   state.wordSpacing + 'em');
-    setVal('margin',        state.margin);       setTxt('marginValue',        state.margin + 'px');
-    setVal('maxWidth',      state.maxWidth);     setTxt('maxWidthValue',      state.maxWidth + 'px');
+    setVal('fontSize',      state.fontSize);
+    setTxt('fontSizeValue',      state.fontSize + 'px');
+    setVal('lineHeight',    state.lineHeight);
+    setTxt('lineHeightValue',    state.lineHeight);
+    setVal('letterSpacing', state.letterSpacing);
+    setTxt('letterSpacingValue', state.letterSpacing + 'em');
+    setVal('wordSpacing',   state.wordSpacing);
+    setTxt('wordSpacingValue',   state.wordSpacing + 'em');
+    setVal('margin',        state.margin);
+    setTxt('marginValue',        state.margin + 'px');
+    setVal('maxWidth',      state.maxWidth);
+    setTxt('maxWidthValue',      state.maxWidth + 'px');
     setVal('bgColor',       state.bgColor);
     setVal('textColor',     state.textColor);
-    setVal('brightness',    state.brightness);   setTxt('brightnessValue',    state.brightness + '%');
-    setVal('whitePoint',    state.whitePoint);   setTxt('whitePointValue',    state.whitePoint + '%');
+    setVal('brightness',    state.brightness);
+    setTxt('brightnessValue',    state.brightness + '%');
+    setVal('whitePoint',    state.whitePoint);
+    setTxt('whitePointValue',    state.whitePoint + '%');
     setChk('grayscale',     state.grayscale);
     setVal('overlayColor',  state.overlayColor);
-    setVal('overlayAlpha',  state.overlayAlpha); setTxt('overlayAlphaValue',  state.overlayAlpha + '%');
+    setVal('overlayAlpha',  state.overlayAlpha);
+    setTxt('overlayAlphaValue',  state.overlayAlpha + '%');
   }
 
   /* ── 6. Preset helpers ─────────────────────────────────────────── */
@@ -298,7 +307,11 @@
     const cat    = el.presetCategory ? el.presetCategory.value : 'accessibility';
     const name   = el.presetName     ? el.presetName.value     : '';
     const preset = (PRESETS[cat] || {})[name];
-    if (preset) { state = Object.assign({}, preset); syncDisplay(); applySettings(); }
+    if (preset) {
+      state = Object.assign({}, preset);
+      syncDisplay();
+      applySettings();
+    }
   });
 
   on(el.reset, 'click', () => {
@@ -308,32 +321,59 @@
   });
 
   // Typography
-  on(el.fontFamily,    'change', () => { state.fontFamily    = el.fontFamily.value;                     applySettings(); });
-  on(el.fontSize,      'input',  () => { state.fontSize      = parseFloat(el.fontSize.value);
-                                         if (el.fontSizeValue)      el.fontSizeValue.textContent      = state.fontSize      + 'px'; applySettings(); });
-  on(el.lineHeight,    'input',  () => { state.lineHeight     = parseFloat(el.lineHeight.value);
-                                         if (el.lineHeightValue)    el.lineHeightValue.textContent    = state.lineHeight;            applySettings(); });
-  on(el.letterSpacing, 'input',  () => { state.letterSpacing  = parseFloat(el.letterSpacing.value);
-                                         if (el.letterSpacingValue) el.letterSpacingValue.textContent = state.letterSpacing + 'em'; applySettings(); });
-  on(el.wordSpacing,   'input',  () => { state.wordSpacing    = parseFloat(el.wordSpacing.value);
-                                         if (el.wordSpacingValue)   el.wordSpacingValue.textContent   = state.wordSpacing   + 'em'; applySettings(); });
+  on(el.fontFamily, 'change', () => {
+    state.fontFamily = el.fontFamily.value;
+    applySettings();
+  });
+  on(el.fontSize, 'input', () => {
+    state.fontSize = parseFloat(el.fontSize.value);
+    if (el.fontSizeValue) el.fontSizeValue.textContent = state.fontSize + 'px';
+    applySettings();
+  });
+  on(el.lineHeight, 'input', () => {
+    state.lineHeight = parseFloat(el.lineHeight.value);
+    if (el.lineHeightValue) el.lineHeightValue.textContent = state.lineHeight;
+    applySettings();
+  });
+  on(el.letterSpacing, 'input', () => {
+    state.letterSpacing = parseFloat(el.letterSpacing.value);
+    if (el.letterSpacingValue) el.letterSpacingValue.textContent = state.letterSpacing + 'em';
+    applySettings();
+  });
+  on(el.wordSpacing, 'input', () => {
+    state.wordSpacing = parseFloat(el.wordSpacing.value);
+    if (el.wordSpacingValue) el.wordSpacingValue.textContent = state.wordSpacing + 'em';
+    applySettings();
+  });
 
   // Layout
-  on(el.margin,    'input', () => { state.margin    = parseFloat(el.margin.value);
-                                    if (el.marginValue)   el.marginValue.textContent   = state.margin    + 'px'; applySettings(); });
-  on(el.maxWidth,  'input', () => { state.maxWidth   = parseFloat(el.maxWidth.value);
-                                    if (el.maxWidthValue) el.maxWidthValue.textContent = state.maxWidth  + 'px'; applySettings(); });
+  on(el.margin, 'input', () => {
+    state.margin = parseFloat(el.margin.value);
+    if (el.marginValue) el.marginValue.textContent = state.margin + 'px';
+    applySettings();
+  });
+  on(el.maxWidth, 'input', () => {
+    state.maxWidth = parseFloat(el.maxWidth.value);
+    if (el.maxWidthValue) el.maxWidthValue.textContent = state.maxWidth + 'px';
+    applySettings();
+  });
 
   // Colors
   on(el.bgColor,   'input', () => { state.bgColor   = el.bgColor.value;   applySettings(); });
   on(el.textColor, 'input', () => { state.textColor = el.textColor.value; applySettings(); });
 
   // Visual filters
-  on(el.brightness, 'input', () => { state.brightness = parseFloat(el.brightness.value);
-                                     if (el.brightnessValue) el.brightnessValue.textContent = state.brightness + '%'; applySettings(); });
-  on(el.whitePoint, 'input', () => { state.whitePoint  = parseFloat(el.whitePoint.value);
-                                     if (el.whitePointValue) el.whitePointValue.textContent = state.whitePoint  + '%'; applySettings(); });
-  on(el.grayscale,  'change', () => { state.grayscale   = el.grayscale.checked;               applySettings(); });
+  on(el.brightness, 'input', () => {
+    state.brightness = parseFloat(el.brightness.value);
+    if (el.brightnessValue) el.brightnessValue.textContent = state.brightness + '%';
+    applySettings();
+  });
+  on(el.whitePoint, 'input', () => {
+    state.whitePoint = parseFloat(el.whitePoint.value);
+    if (el.whitePointValue) el.whitePointValue.textContent = state.whitePoint + '%';
+    applySettings();
+  });
+  on(el.grayscale, 'change', () => { state.grayscale = el.grayscale.checked; applySettings(); });
   on(el.overlayColor,'change', () => { state.overlayColor = el.overlayColor.value;            applySettings(); });
   on(el.overlayAlpha,'input',  () => { state.overlayAlpha = parseFloat(el.overlayAlpha.value);
                                        if (el.overlayAlphaValue) el.overlayAlphaValue.textContent = state.overlayAlpha + '%'; applySettings(); });

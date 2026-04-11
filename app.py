@@ -1,4 +1,6 @@
 import io
+import logging
+import os
 
 from flask import Flask, jsonify, render_template, request, send_file
 from werkzeug.utils import secure_filename
@@ -13,7 +15,7 @@ def _allowed(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# ── Parsers ────────────────────────────────────────────────────────────────────
+# -- Parsers -------------------------------------------------------------------
 
 def _parse_txt(data: bytes) -> str:
     return data.decode("utf-8", errors="replace")
@@ -38,7 +40,7 @@ def _parse_pdf(data: bytes) -> str:
     return "\n\n".join(pages)
 
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+# -- Routes --------------------------------------------------------------------
 
 @app.route("/")
 def index():
@@ -58,7 +60,13 @@ def upload():
         return jsonify({"error": "Unsupported file type. Upload .txt, .pdf, or .docx"}), 400
 
     filename = secure_filename(f.filename)
+    if not filename or "." not in filename:
+        return jsonify({"error": "Invalid filename"}), 400
+
     ext = filename.rsplit(".", 1)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return jsonify({"error": "Unsupported file type. Upload .txt, .pdf, or .docx"}), 400
+
     data = f.read()
 
     try:
@@ -69,7 +77,8 @@ def upload():
         else:  # pdf
             text = _parse_pdf(data)
     except Exception as exc:
-        return jsonify({"error": f"Could not parse file: {exc}"}), 500
+        app.logger.error("File parse error for %s: %s", filename, exc)
+        return jsonify({"error": "Could not parse the uploaded file. Ensure it is a valid .txt, .pdf, or .docx document."}), 500
 
     return jsonify({"text": text, "filename": filename})
 
@@ -105,7 +114,7 @@ def export():
     return jsonify({"error": "Unsupported export format"}), 400
 
 
-# ── Docx builder ───────────────────────────────────────────────────────────────
+# -- Docx builder ---------------------------------------------------------------
 
 def _build_docx(text: str, settings: dict) -> io.BytesIO:
     import docx
@@ -155,4 +164,5 @@ def _build_docx(text: str, settings: dict) -> io.BytesIO:
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(debug=debug)
