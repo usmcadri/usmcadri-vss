@@ -5,28 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>VSS Tools</title>
 
-  <!-- Reuse shared UI styles -->
   <link rel="stylesheet" href="../static/styles.css" />
 
   <style>
-    /* Make the popup compact */
-    body { background: var(--panel-bg); }
-    .layout { grid-template-columns: 1fr; min-height: auto; }
-    .controls { display: block; border-right: none; }
+    /* ── Compact popup overrides ── */
+    body {
+      background: var(--panel-bg);
+      width: 300px;
+      min-height: auto;
+    }
+    .layout {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .controls {
+      display: flex;
+      border-right: none;
+      padding: 10px 12px;
+      gap: 10px;
+    }
     .viewerWrap { display: none; }
     .topbar__toggle { display: none; }
+    .topbar { padding: 0 14px; height: 44px; }
+    .card { padding: 10px 12px; gap: 8px; }
+    .card__title { font-size: 0.68rem; }
+
+    /* Open web-app link */
+    .open-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background var(--transition);
+    }
+    .open-link:hover { background: var(--border); text-decoration: none; }
   </style>
 </head>
 <body>
   <header class="topbar">
+    <div class="topbar__logo" aria-hidden="true">👁</div>
     <div class="topbar__title">VSS Tools</div>
   </header>
 
   <main class="layout">
     <aside class="controls" id="controls">
+
+      <!-- Preset -->
       <section class="card">
         <h2 class="card__title">Preset</h2>
-
         <label class="field">
           <span class="field__label">Category</span>
           <select id="presetCategory" class="field__control">
@@ -35,15 +70,14 @@
             <option value="noir">Filter (NoIR-style)</option>
           </select>
         </label>
-
         <label class="field">
           <span class="field__label">Preset</span>
           <select id="presetName" class="field__control"></select>
         </label>
-
-        <div class="hint">Settings are saved in this extension.</div>
+        <div class="hint">Applied to the current tab.</div>
       </section>
 
+      <!-- Intensity -->
       <section class="card">
         <h2 class="card__title">Intensity</h2>
         <label class="field">
@@ -56,6 +90,7 @@
         </div>
       </section>
 
+      <!-- Text -->
       <section class="card">
         <h2 class="card__title">Text</h2>
         <label class="field">
@@ -63,18 +98,61 @@
           <input id="fontSize" class="field__control" type="range" min="14" max="28" value="18" />
         </label>
         <div class="pill" id="fontSizeValue">18px</div>
-
         <label class="field">
           <span class="field__label">Line height</span>
           <input id="lineHeight" class="field__control" type="range" min="1.2" max="2.0" step="0.05" value="1.6" />
         </label>
         <div class="pill" id="lineHeightValue">1.6</div>
       </section>
+
+      <!-- Reading highlight toggle -->
+      <section class="card">
+        <h2 class="card__title">Reading</h2>
+        <label class="toggle">
+          <input type="checkbox" class="toggle__input" id="rulerToggle" checked />
+          <span class="toggle__track"></span>
+          <span class="toggle__label">Reading ruler</span>
+        </label>
+        <div class="hint">Highlights the current line while browsing.</div>
+      </section>
+
+      <!-- Open web app -->
+      <a class="open-link" href="http://127.0.0.1:5000" target="_blank">
+        📂 Open Document Viewer
+      </a>
+
     </aside>
   </main>
 
-  <!-- app.js initializes the UI + preset logic -->
   <script src="../static/app.js"></script>
   <script src="popup.js"></script>
+  <script>
+    // ── Send settings to the active tab via content script ──
+    function broadcastToTab() {
+      const state = {
+        presetCategory: document.getElementById("presetCategory")?.value,
+        presetName:     document.getElementById("presetName")?.value,
+        overlayAlpha:   document.getElementById("overlayAlpha")?.value,
+        fontSize:       document.getElementById("fontSize")?.value,
+        lineHeight:     document.getElementById("lineHeight")?.value,
+        rulerEnabled:   document.getElementById("rulerToggle")?.checked,
+      };
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        if (tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { type: "VSS_SETTINGS", state })
+            .catch(() => {/* tab may not have content script */});
+        }
+      });
+    }
+
+    const watchIds = ["presetCategory","presetName","overlayAlpha","fontSize","lineHeight"];
+    watchIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener(el.tagName === "SELECT" ? "change" : "input", broadcastToTab);
+    });
+    document.getElementById("rulerToggle")?.addEventListener("change", broadcastToTab);
+  </script>
 </body>
 </html>
+

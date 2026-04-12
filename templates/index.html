@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VSS Accessibility Tools</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <style>
+    /* ── page-specific extras ── */
+    .viewer-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .viewer-toolbar .pill { cursor: default; }
+    #docName {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #summaryBar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent-warm);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: var(--text);
+      display: none;
+    }
+    #summaryBar.visible { display: block; }
+    #summaryBar strong { color: var(--accent-warm); }
+    .word-count { font-size: 0.75rem; color: var(--text-muted); text-align: right; }
+  </style>
+</head>
+<body>
+  <!-- ── Top bar ── -->
+  <header class="topbar">
+    <div class="topbar__logo" aria-hidden="true">👁</div>
+    <div class="topbar__title">VSS Accessibility Tools</div>
+    <div class="topbar__spacer"></div>
+    <button class="topbar__toggle" id="sidebarToggle">☰ Settings</button>
+  </header>
+
+  <main class="layout">
+    <!-- ── Sidebar ── -->
+    <aside class="controls" id="controls">
+
+      <!-- Upload -->
+      <section class="card">
+        <h2 class="card__title">Document</h2>
+        <label class="upload-zone" id="dropZone">
+          <div class="upload-zone__icon">📂</div>
+          <div class="upload-zone__text">Drop a file here or <u>browse</u><br><small>.txt · .docx · .pdf</small></div>
+          <input type="file" id="fileInput" accept=".txt,.docx,.pdf" />
+        </label>
+        <div class="progress" id="uploadProgress">
+          <div class="progress__bar" id="uploadBar"></div>
+        </div>
+        <div id="docName"></div>
+      </section>
+
+      <!-- Preset -->
+      <section class="card">
+        <h2 class="card__title">Preset</h2>
+        <label class="field">
+          <span class="field__label">Category</span>
+          <select id="presetCategory" class="field__control">
+            <option value="whiteBalance">White Balance</option>
+            <option value="visionCondition">Vision Condition</option>
+            <option value="noir">Filter (NoIR-style)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Preset</span>
+          <select id="presetName" class="field__control"></select>
+        </label>
+        <div class="hint">Filter is applied to the document viewer.</div>
+      </section>
+
+      <!-- Intensity -->
+      <section class="card">
+        <h2 class="card__title">Intensity</h2>
+        <label class="field">
+          <span class="field__label">Overlay strength</span>
+          <input id="overlayAlpha" class="field__control" type="range" min="0" max="100" value="35" />
+        </label>
+        <div class="row">
+          <div class="pill" id="overlayAlphaValue">35%</div>
+          <button class="button" id="reset">Reset</button>
+        </div>
+      </section>
+
+      <!-- Text -->
+      <section class="card">
+        <h2 class="card__title">Text</h2>
+        <label class="field">
+          <span class="field__label">Font size</span>
+          <input id="fontSize" class="field__control" type="range" min="14" max="28" value="18" />
+        </label>
+        <div class="pill" id="fontSizeValue">18px</div>
+
+        <label class="field">
+          <span class="field__label">Line height</span>
+          <input id="lineHeight" class="field__control" type="range" min="1.2" max="2.0" step="0.05" value="1.6" />
+        </label>
+        <div class="pill" id="lineHeightValue">1.6</div>
+      </section>
+
+      <!-- Reading Highlight -->
+      <section class="card">
+        <h2 class="card__title">Reading</h2>
+        <label class="toggle">
+          <input type="checkbox" class="toggle__input" id="highlightToggle" checked />
+          <span class="toggle__track"></span>
+          <span class="toggle__label">Highlight on hover</span>
+        </label>
+        <div class="hint">Highlights the paragraph your cursor is over.</div>
+      </section>
+
+    </aside>
+
+    <!-- ── Viewer ── -->
+    <section class="viewerWrap">
+      <!-- Summary bar (shown after upload) -->
+      <div id="summaryBar">
+        <strong>📋 Summary:</strong> <span id="summaryText">Generating…</span>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="viewer-toolbar">
+        <span class="pill" id="wordCountPill">0 words</span>
+        <span id="docName2" style="font-size:0.82rem;color:var(--text-muted);flex:1"></span>
+      </div>
+
+      <!-- Document content -->
+      <div class="viewer viewer--empty" id="viewer">
+        <span>Upload a document to get started.</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    // ── Upload & display logic ─────────────────────────────
+    const dropZone    = document.getElementById("dropZone");
+    const fileInput   = document.getElementById("fileInput");
+    const progress    = document.getElementById("uploadProgress");
+    const bar         = document.getElementById("uploadBar");
+    const docName     = document.getElementById("docName");
+    const docName2    = document.getElementById("docName2");
+    const viewer      = document.getElementById("viewer");
+    const summaryBar  = document.getElementById("summaryBar");
+    const summaryText = document.getElementById("summaryText");
+    const wordPill    = document.getElementById("wordCountPill");
+
+    // Sidebar toggle (mobile)
+    document.getElementById("sidebarToggle").addEventListener("click", () => {
+      const ctrl = document.getElementById("controls");
+      ctrl.style.display = ctrl.style.display === "none" ? "" : "none";
+    });
+
+    // Drag-and-drop
+    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+    dropZone.addEventListener("dragleave", ()  => dropZone.classList.remove("drag-over"));
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("drag-over");
+      const f = e.dataTransfer.files[0];
+      if (f) uploadFile(f);
+    });
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files[0]) uploadFile(fileInput.files[0]);
+    });
+
+    async function uploadFile(file) {
+      const form = new FormData();
+      form.append("file", file);
+
+      // Show progress
+      progress.classList.add("progress--active");
+      bar.style.width = "20%";
+
+      // Update name labels
+      docName.textContent  = file.name;
+      docName2.textContent = file.name;
+
+      // Show summary bar loading state
+      summaryBar.classList.add("visible");
+      summaryText.textContent = "Generating…";
+
+      try {
+        bar.style.width = "50%";
+        const res  = await fetch("/upload", { method: "POST", body: form });
+        bar.style.width = "85%";
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Upload failed");
+        }
+
+        const data = await res.json();
+        bar.style.width = "100%";
+        setTimeout(() => progress.classList.remove("progress--active"), 600);
+
+        // Render document
+        renderDocument(data.text || "");
+
+        // Show summary
+        summaryText.textContent = data.summary || "No summary available.";
+
+      } catch (err) {
+        bar.style.width = "100%";
+        bar.style.background = "var(--danger, #f85149)";
+        setTimeout(() => {
+          progress.classList.remove("progress--active");
+          bar.style.background = "";
+          bar.style.width = "0%";
+        }, 1200);
+        summaryText.textContent = "⚠️ " + err.message;
+        console.error(err);
+      }
+    }
+
+    function renderDocument(text) {
+      if (!text.trim()) {
+        viewer.innerHTML = '<span>The document appears to be empty.</span>';
+        viewer.classList.add("viewer--empty");
+        return;
+      }
+      viewer.classList.remove("viewer--empty");
+
+      // Split into paragraphs (blank-line separated) and render
+      const paras = text
+        .split(/\n{2,}/)
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      viewer.innerHTML = paras
+        .map(p => `<p>${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
+        .join("");
+
+      // Word count
+      const words = text.trim().split(/\s+/).length;
+      wordPill.textContent = words.toLocaleString() + " words";
+
+      // Re-init reading highlight for the new content
+      if (typeof initReadingHighlight === "function") initReadingHighlight();
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
