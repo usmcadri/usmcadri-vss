@@ -233,14 +233,15 @@ function initReadingHighlight() {
 
       appendMsg("user", text);
       setLoading(true);
-      const typing = appendMsg("bot chat-msg--typing", "…");
+      const typing = appendMsg("bot", "…");
+      typing.classList.add("chat-msg--typing");
 
       try {
         const reply = await callChatAPI(text);
-        typing.className = "chat-msg chat-msg--bot";
+        typing.classList.remove("chat-msg--typing");
         typing.textContent = reply;
       } catch (err) {
-        typing.className = "chat-msg chat-msg--bot";
+        typing.classList.remove("chat-msg--typing");
         typing.textContent = "⚠️ " + (err.message || "Could not get a response.");
       } finally {
         setLoading(false);

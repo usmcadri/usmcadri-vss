@@ -75,7 +75,10 @@
 
   function onMouseMove(e) {
     if (!ruler) return;
-    const lineH = parseFloat(getComputedStyle(document.body).lineHeight) || 24;
+    const bodyLineH = document.body
+      ? parseFloat(getComputedStyle(document.body).lineHeight)
+      : NaN;
+    const lineH = isNaN(bodyLineH) ? 24 : bodyLineH;
     const rulerH = Math.max(lineH, 28);
     ruler.style.height = rulerH + "px";
     ruler.style.top = (e.clientY - rulerH / 2) + "px";

@@ -10,9 +10,10 @@ app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB upload limit
 try:
     from openai import OpenAI as _OAI
 
-    _oa_client = _OAI(api_key=os.environ.get("OPENAI_API_KEY", ""))
+    _api_key = os.environ.get("OPENAI_API_KEY")
+    _oa_client = _OAI(api_key=_api_key) if _api_key else None
     _OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
-    OPENAI_AVAILABLE = bool(os.environ.get("OPENAI_API_KEY"))
+    OPENAI_AVAILABLE = bool(_api_key)
 except ImportError:
     _oa_client = None
     OPENAI_AVAILABLE = False
@@ -145,8 +146,8 @@ def upload():
 
     try:
         text = extractor(f.stream)
-    except ValueError as exc:
-        return jsonify(error=str(exc)), 422
+    except ValueError:
+        return jsonify(error="Could not parse the uploaded file. The file may be corrupt or password-protected."), 422
 
     summary = summarise(text)
     return jsonify(text=text, summary=summary)
@@ -165,8 +166,8 @@ def chat():
         try:
             reply = chat_with_openai(message, context)
             return jsonify(reply=reply)
-        except Exception as exc:
-            return jsonify(error=str(exc)), 500
+        except Exception:
+            return jsonify(error="AI service unavailable. Please try again later."), 500
 
     reply = chat_fallback(message, context)
     return jsonify(reply=reply)
